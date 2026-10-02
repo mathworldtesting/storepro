@@ -15,3 +15,6 @@ inventory/app.zip
 
 # Windows download markers copied into WSL
 *:Zone.Identifier
+
+# Azure App Service deploy target (subscription-specific)
+inventory/.vscode/settings.json
