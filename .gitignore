@@ -1,0 +1,17 @@
+# Build output
+bin/
+obj/
+
+# setup.sh runtime state and logs
+.setup/
+
+# Checked-in publish output
+inventory/public/
+inventory/app.zip
+
+# IDE / user-specific
+.vs/
+*.user
+
+# Windows download markers copied into WSL
+*:Zone.Identifier
