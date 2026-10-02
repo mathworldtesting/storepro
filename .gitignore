@@ -16,5 +16,8 @@ inventory/app.zip
 # Windows download markers copied into WSL
 *:Zone.Identifier
 
+# VS Code SQLTools runtime marker (written under WSL with a Windows path as its name)
+*.node-runtime
+
 # Azure App Service deploy target (subscription-specific)
 inventory/.vscode/settings.json
