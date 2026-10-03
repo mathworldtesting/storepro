@@ -67,17 +67,25 @@ The catalog and cart builds show one warning (`NETSDK1206`) about an Alpine-only
 
 There are no tests and no linter.
 
-### One-step install for catalog
+### One-step setup scripts
 
-`setup.sh` installs the .NET 8 SDK if it is missing, restores and builds catalog, starts it and health-checks the home page:
+Each app has a script that installs the .NET 8 SDK and ASP.NET Core 8 runtime if they are missing (user-local, in `~/.dotnet`), restores and builds the app, starts it in the background and health-checks the home page:
+
+| App | Script | Default port |
+|---|---|---|
+| catalog | `./setup.sh` (repo root) | 5000 |
+| inventory | `inventory/_setup_inventory.sh` | 5002 |
+| cart | `cart/_setup_cart.sh` | 5004 |
+
+All three take the same options:
 
 ```bash
-./setup.sh                 # start on port 5000, or the next free port
+./setup.sh                 # start on the default port, or the next free one
 PORT=8080 ./setup.sh       # start on a specific port
 ./setup.sh --stop          # stop the app started by the script
 ```
 
-State and logs go to `.setup/`. The script covers catalog only.
+State and logs go to `.setup/` next to each script. If the app is already running, the script says so and exits. The inventory and cart scripts also warn about placeholder settings in `appsettings.json`.
 
 ## Setup
 
@@ -127,7 +135,7 @@ cd inventory && dotnet run    # http://localhost:5002
 cd cart && dotnet run         # http://localhost:5004
 ```
 
-Each app uses the ports in its `Properties/launchSettings.json`, so all three can run at the same time (one terminal each).
+Each app uses the ports in its `Properties/launchSettings.json`, so all three can run at the same time (one terminal each). Or start them in the background with the [setup scripts](#one-step-setup-scripts).
 
 What to expect before any setup:
 
@@ -161,6 +169,6 @@ dotnet publish -c Release                 # run inside an app folder
 
 - **Version mismatch:** the EF Core packages are version 6.0.3 but the projects target .NET 8. The apps work as is, but upgrading the packages to 8.x would be cleaner.
 - **HTTPS:** HTTPS redirection is commented out in all three apps, so the http URLs work directly.
-- **Ignored files:** `.gitignore` excludes `bin/`, `obj/`, `.setup/` (state and logs from `setup.sh`), and the publish output in `inventory/public/` and `inventory/app.zip`.
+- **Ignored files:** `.gitignore` excludes `bin/`, `obj/`, `.setup/` (state and logs from the setup scripts), and the publish output in `inventory/public/` and `inventory/app.zip`.
 - **Images:** file names are case-sensitive on Linux. The catalog page references `images/cart.jpg` but the file is `cart.JPG`, and the seeded books point to cover images that are not in `wwwroot/images`.
 - **Kubernetes port:** `cart/deployment.yaml` declares `containerPort: 80`, but the container listens on 5004. The Service's `targetPort: 5004` is what routes traffic.

@@ -23,9 +23,11 @@ dotnet build inventory/inventory.csproj
 cd <app> && dotnet run                # ports per the table above (Properties/launchSettings.json)
 dotnet publish -c Release
 
-./setup.sh                            # catalog only: installs .NET 8 if missing, builds, starts, health-checks
+./setup.sh                            # catalog: installs .NET 8 if missing, builds, starts, health-checks
 PORT=8080 ./setup.sh
 ./setup.sh --stop                     # state/logs in .setup/
+inventory/_setup_inventory.sh         # same for inventory (port 5002); also PORT=, --stop
+cart/_setup_cart.sh                   # same for cart (port 5004); also PORT=, --stop
 
 cd cart && docker build -t cart .     # container listens on 5004
 kubectl apply -f cart/deployment.yaml # image memicourseregistry.azurecr.io/cart:latest, LoadBalancer 80 -> 5004
@@ -52,7 +54,7 @@ catalog and cart builds emit one `NETSDK1206` warning (Alpine-only SQLite lib) â
 
 ## Gotchas
 
-- `setup.sh` handles catalog only; it predates the cart and inventory apps.
+- Each app has its own setup script: root `setup.sh` (catalog), `inventory/_setup_inventory.sh`, `cart/_setup_cart.sh`. The per-app scripts are trimmed copies of `setup.sh` (one clean-restore retry instead of its two-pass repair loop), keep state in `<app>/.setup/`, and are LF even though cart/inventory sources are CRLF. Change all three when changing shared behaviour.
 - EF Core packages are pinned to 6.0.3 while the target framework is net8.0. It works; upgrading to 8.x would align them.
 - `inventory/public/` and `inventory/app.zip` are checked-in publish output, not source. `inventory/.vscode/settings.json` points the Azure App Service extension at a specific subscription/slot.
 - cart and inventory sources use CRLF line endings; catalog uses LF.
